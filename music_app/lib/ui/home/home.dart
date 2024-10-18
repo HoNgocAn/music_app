@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:music_app/ui/discovery/discovery.dart';
 import 'package:music_app/ui/home/viewmodel.dart';
+import 'package:music_app/ui/login/login.dart';
 import 'package:music_app/ui/now_playing/audio_player_manager.dart';
 import 'package:music_app/ui/settings/settings.dart';
 import 'package:music_app/ui/user/user.dart';
@@ -15,7 +16,7 @@ class MusicApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: "MusicApp",
+      title: "Hello",
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
@@ -38,31 +39,76 @@ class _MusicHomePageState extends State<MusicHomePage> {
     const HomeTab(),
     const DiscoveryTab(),
     const AccountTab(),
-    const SettingsTab()
+    const SettingsTab(),
   ];
+
+  int _currentIndex = 0; // Theo dõi tab hiện tại
 
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-        navigationBar: const CupertinoNavigationBar(
-          middle: Text("Music App"),
+      navigationBar: const CupertinoNavigationBar(
+        middle: Text("Music App"),
+      ),
+      child: CupertinoTabScaffold(
+        tabBar: CupertinoTabBar(
+          backgroundColor: Theme.of(context).colorScheme.onInverseSurface,
+          items: const [
+            BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+            BottomNavigationBarItem(icon: Icon(Icons.album), label: "Discovery"),
+            BottomNavigationBarItem(icon: Icon(Icons.person), label: "Account"),
+            BottomNavigationBarItem(icon: Icon(Icons.settings), label: "Settings"),
+          ],
+          onTap: (int index) {
+            if (index == 3) {
+              // Kiểm tra nếu tab "Settings" được nhấn
+              _showSettingsMenu(context);
+            } else {
+              setState(() {
+                _currentIndex = index; // Cập nhật tab hiện tại
+              });
+            }
+          },
         ),
-        child: CupertinoTabScaffold(
-            tabBar: CupertinoTabBar(
-              backgroundColor: Theme.of(context).colorScheme.onInverseSurface,
-              items: const [
-                BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-                BottomNavigationBarItem(
-                    icon: Icon(Icons.album), label: "Discovery"),
-                BottomNavigationBarItem(
-                    icon: Icon(Icons.person), label: "Account"),
-                BottomNavigationBarItem(
-                    icon: Icon(Icons.settings), label: "Settings")
-              ],
-            ),
-            tabBuilder: (BuildContext context, int index) {
-              return _tabs[index];
-            }));
+        tabBuilder: (BuildContext context, int index) {
+          return _tabs[_currentIndex]; // Hiển thị tab tương ứng
+        },
+      ),
+    );
+  }
+
+  void _showSettingsMenu(BuildContext context) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) => CupertinoActionSheet(
+        title: const Text("Settings Menu"),
+        actions: [
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(context); // Đóng bảng menu
+              Navigator.push(
+                context,
+                CupertinoPageRoute(builder: (context) => const LoginView()), // Điều hướng đến trang Login
+              );
+            },
+            child: const Text("Login"),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(context); // Đóng bảng menu
+              // Xử lý các hành động khác như "Logout"
+            },
+            child: const Text("Logout"),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () {
+            Navigator.pop(context); // Đóng bảng menu
+          },
+          child: const Text("Cancel"),
+        ),
+      ),
+    );
   }
 }
 
