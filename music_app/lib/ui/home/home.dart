@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:music_app/ui/discovery/discovery.dart';
@@ -8,6 +9,7 @@ import 'package:music_app/ui/settings/settings.dart';
 import 'package:music_app/ui/user/user.dart';
 
 import '../../data/model/Song.dart';
+import '../../service/auth_service.dart';
 import '../now_playing/nowPlaying.dart';
 
 class MusicApp extends StatelessWidget {
@@ -38,11 +40,41 @@ class _MusicHomePageState extends State<MusicHomePage> {
   final List<Widget> _tabs = [
     const HomeTab(),
     const DiscoveryTab(),
-    const AccountTab(),
+    AccountTab(),
     const SettingsTab(),
   ];
 
+  AuthService authService = AuthService();
+  User? currentUser; // Khai báo currentUser mà chưa gán giá trị
+
   int _currentIndex = 0; // Theo dõi tab hiện tại
+
+  logOut(context) async {
+    await FirebaseAuth.instance.signOut();
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const LoginView()),
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Kiểm tra người dùng đã đăng nhập hay chưa trong initState
+    currentUser = authService.checkUserLoggedIn();
+
+    if (currentUser != null) {
+      print("User is logged in: ${currentUser!.email}");
+    } else {
+      print("No user is logged in.");
+    }
+
+    // Nếu muốn cập nhật UI khi user thay đổi
+    setState(() {
+      currentUser = authService.checkUserLoggedIn();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,9 +87,11 @@ class _MusicHomePageState extends State<MusicHomePage> {
           backgroundColor: Theme.of(context).colorScheme.onInverseSurface,
           items: const [
             BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-            BottomNavigationBarItem(icon: Icon(Icons.album), label: "Discovery"),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.album), label: "Discovery"),
             BottomNavigationBarItem(icon: Icon(Icons.person), label: "Account"),
-            BottomNavigationBarItem(icon: Icon(Icons.settings), label: "Settings"),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.settings), label: "Settings"),
           ],
           onTap: (int index) {
             if (index == 3) {
@@ -83,23 +117,26 @@ class _MusicHomePageState extends State<MusicHomePage> {
       builder: (BuildContext context) => CupertinoActionSheet(
         title: const Text("Settings Menu"),
         actions: [
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(context); // Đóng bảng menu
-              Navigator.push(
-                context,
-                CupertinoPageRoute(builder: (context) => const LoginView()), // Điều hướng đến trang Login
-              );
-            },
-            child: const Text("Login"),
-          ),
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(context); // Đóng bảng menu
-              // Xử lý các hành động khác như "Logout"
-            },
-            child: const Text("Logout"),
-          ),
+          currentUser == null
+              ? CupertinoActionSheetAction(
+                  onPressed: () {
+                    Navigator.pop(context); // Đóng bảng menu
+                    Navigator.push(
+                      context,
+                      CupertinoPageRoute(
+                          builder: (context) =>
+                              const LoginView()), // Điều hướng đến trang Login
+                    );
+                  },
+                  child: const Text("Login"),
+                )
+              : CupertinoActionSheetAction(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    logOut(context);
+                  },
+                  child: const Text("Logout"),
+                ),
         ],
         cancelButton: CupertinoActionSheetAction(
           onPressed: () {
@@ -198,39 +235,39 @@ class _HomeTabPageState extends State<HomeTabPage> {
     });
   }
 
-  void showBottomSheet(){
-    showModalBottomSheet(context: context, builder: (context){
-      return ClipRRect(
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-        child: Container(
-          height: 400,
-          color: Colors.grey,
-          child: Center (
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget> [
-                const Text("Model Bottom Sheet"),
-                ElevatedButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text("Close Bottom Sheet"))
-              ],
+  void showBottomSheet() {
+    showModalBottomSheet(
+        context: context,
+        builder: (context) {
+          return ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+            child: Container(
+              height: 400,
+              color: Colors.grey,
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    const Text("Model Bottom Sheet"),
+                    ElevatedButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text("Close Bottom Sheet"))
+                  ],
+                ),
+              ),
             ),
-          ),
-        ),
-      );
-    });
+          );
+        });
   }
 
-  void navigate(Song song){
-    Navigator.push(context,
-      CupertinoPageRoute(builder: (context){
-        return NowPlaying (
-          songs: songs,
-          playingSong: song,
-        );
-      })
-    );
+  void navigate(Song song) {
+    Navigator.push(context, CupertinoPageRoute(builder: (context) {
+      return NowPlaying(
+        songs: songs,
+        playingSong: song,
+      );
+    }));
   }
 }
 
@@ -246,10 +283,7 @@ class _SongItemSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      contentPadding: const EdgeInsets.only(
-        left: 24,
-        right: 8
-      ),
+      contentPadding: const EdgeInsets.only(left: 24, right: 8),
       leading: ClipRRect(
         borderRadius: BorderRadius.circular(14),
         child: FadeInImage.assetNetwork(
@@ -257,7 +291,7 @@ class _SongItemSection extends StatelessWidget {
           image: song.image,
           width: 48,
           height: 48,
-          imageErrorBuilder: (context, error, stackTrace){
+          imageErrorBuilder: (context, error, stackTrace) {
             return Image.asset(
               "assets/img_err.png",
               width: 48,
@@ -271,12 +305,11 @@ class _SongItemSection extends StatelessWidget {
       ),
       subtitle: Text(song.artist),
       trailing: IconButton(
-          onPressed: (){
+          onPressed: () {
             parent.showBottomSheet();
           },
-          icon: const Icon(Icons.more_horiz)
-      ),
-      onTap: (){
+          icon: const Icon(Icons.more_horiz)),
+      onTap: () {
         parent.navigate(song);
       },
     );

@@ -78,11 +78,11 @@ class _NowPlayingPageState extends State<NowPlayingPage>
               children: [
                 Text(_song.album),
                 const SizedBox(
-                  height: 16,
+                  height: 10,
                 ),
                 const Text("_ ___ _"),
                 const SizedBox(
-                  height: 48,
+                  height: 30,
                 ),
                 RotationTransition(
                   turns: Tween(begin: 0.0, end: 1.0)

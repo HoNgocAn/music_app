@@ -9,6 +9,16 @@ class AuthService {
 
   var db = Db();
 
+  // Kiểm tra xem người dùng đã đăng nhập hay chưa
+  User? checkUserLoggedIn() {
+    return FirebaseAuth.instance.currentUser;
+  }
+  // Lấy email của người dùng đã đăng nhập
+  String? getUserEmail() {
+    User? user = FirebaseAuth.instance.currentUser;
+    return user?.email; // Trả về email nếu người dùng đã đăng nhập
+  }
+
   Future<bool> createUser(data, context) async {
     try {
       await FirebaseAuth.instance.createUserWithEmailAndPassword(
@@ -51,7 +61,7 @@ class AuthService {
       );
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (context) => const HomeTabPage()),
+        MaterialPageRoute(builder: (context) => const MusicHomePage()),
             (Route<dynamic> route) => false, // Xóa tất cả các route trước đó
       );
       return true;

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:music_app/ui/home/home.dart';
 import 'package:music_app/ui/login/sign_up.dart';
@@ -13,9 +12,7 @@ class LoginView extends StatefulWidget {
   State<LoginView> createState() => _LoginViewState();
 }
 
-
 class _LoginViewState extends State<LoginView> {
-
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   final _emailController = TextEditingController();
@@ -26,7 +23,7 @@ class _LoginViewState extends State<LoginView> {
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
-        isLoader = true;  // Bắt đầu hiển thị loader
+        isLoader = true; // Bắt đầu hiển thị loader
       });
 
       var data = {
@@ -69,87 +66,115 @@ class _LoginViewState extends State<LoginView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF252634),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-            key: _formKey,
-            child: Column(
-              children: [
-                const SizedBox(height: 80.0),
-                const SizedBox(
-                  width: 250,
-                  child: Text(
-                    "Login Account",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
+      body: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  const SizedBox(height: 80.0),
+                  const SizedBox(
+                    width: 250,
+                    child: Text(
+                      "Login Account",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
                         color: Colors.white,
                         fontSize: 28,
-                        fontWeight: FontWeight.bold
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 50.0),
-                TextFormField(
-                  controller: _emailController,
-                  style: const TextStyle(color: Colors.white),
-                  keyboardType: TextInputType.emailAddress,
-                  autovalidateMode: AutovalidateMode.onUserInteraction,
-                  decoration: _buildInputDecoration("Email", Icons.email),
-                  validator: appValidator.validateEmail,
-                ),
-                const SizedBox(height: 16.0),
-                TextFormField(
-                  controller: _passwordController,
-                  style: const TextStyle(color: Colors.white),
-                  autovalidateMode: AutovalidateMode.onUserInteraction,
-                  decoration: _buildInputDecoration("Password", Icons.password),
-                  validator: appValidator.validatePassword,
-                  obscureText: true,
-                ),
-                const SizedBox(height: 40.0),
-                SizedBox(
-                  height: 50,
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: isLoader ? null : () {
-                      _submitForm();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFF15900), // Màu nền của nút
-                      foregroundColor: Colors.white, // Màu chữ (foreground)
-                      textStyle: const TextStyle(fontSize: 18), // Kích thước chữ
-                    ),
-                    child: isLoader
-                        ? const Center(child: CircularProgressIndicator())
-                        : const Text("Login",
-                      style: TextStyle(color: Colors.white, fontSize: 25),
+                  const SizedBox(height: 50.0),
+                  TextFormField(
+                    controller: _emailController,
+                    style: const TextStyle(color: Colors.white),
+                    keyboardType: TextInputType.emailAddress,
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    decoration: _buildInputDecoration("Email", Icons.email),
+                    validator: appValidator.validateEmail,
+                  ),
+                  const SizedBox(height: 16.0),
+                  TextFormField(
+                    controller: _passwordController,
+                    style: const TextStyle(color: Colors.white),
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    decoration:
+                        _buildInputDecoration("Password", Icons.password),
+                    validator: appValidator.validatePassword,
+                    obscureText: true,
+                  ),
+                  const SizedBox(height: 40.0),
+                  SizedBox(
+                    height: 50,
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: isLoader
+                          ? null
+                          : () {
+                              _submitForm();
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFF15900),
+                        foregroundColor: Colors.white,
+                        textStyle: const TextStyle(fontSize: 18),
+                      ),
+                      child: isLoader
+                          ? const Center(child: CircularProgressIndicator())
+                          : const Text(
+                              "Login",
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 25),
+                            ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 20.0),
-                TextButton(
+                  const SizedBox(height: 20.0),
+                  TextButton(
                     onPressed: () {
                       Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context)=> const SignUpView()));
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const SignUpView()),
+                      );
                     },
                     child: const Text(
                       "Create New Account",
                       style: TextStyle(color: Color(0xFFF15900), fontSize: 22),
-                    )),
-                const SizedBox(height: 250.0),
-                TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context)=> const MusicHomePage()));
-                    },
-                    child: const Text(
-                      "Back",
-                      style: TextStyle(color: Colors.blue, fontSize: 22),
-                    )),
-              ],
-            )),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Positioned(
+            top: 60,
+            right: 30,
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const MusicHomePage()),
+                );
+              },
+              child: const Row(
+                children: [
+                  Icon(
+                    Icons.arrow_back, // Mũi tên quay lại
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                  SizedBox(width: 2), // Khoảng cách giữa mũi tên và chữ "Back"
+                  Text(
+                    "Back", // Chữ "Back"
+                    style: TextStyle(color: Colors.white, fontSize: 18),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
